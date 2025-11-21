@@ -58,7 +58,7 @@ public class GetSaleHandlerTests
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage($"Sale with ID {command.SaleId} not found.");
     }
 

@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Repositories;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
+using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -13,11 +14,13 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale
     {
         private readonly ISaleRepository _saleRepository;
         private readonly IValidator<DeleteSaleCommand> _validator;
+        private readonly ILogger<DeleteSaleHandler> _logger;
 
-        public DeleteSaleHandler(ISaleRepository saleRepository, IValidator<DeleteSaleCommand> validator)
+        public DeleteSaleHandler(ISaleRepository saleRepository, IValidator<DeleteSaleCommand> validator, ILogger<DeleteSaleHandler> logger)
         {
             _saleRepository = saleRepository;
             _validator = validator;
+            _logger = logger;
         }
 
         public async Task<bool> Handle(DeleteSaleCommand request, CancellationToken cancellationToken)
@@ -28,7 +31,10 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale
 
             var sale = await _saleRepository.GetByIdAsync(request.SaleId, cancellationToken);
             if (sale == null)
-                throw new KeyNotFoundException($"Sale with ID {request.SaleId} not found");
+            {
+                _logger.LogWarning("Sale with ID {SaleId} not found.", request.SaleId);
+                throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(request.SaleId), $"Sale with ID {request.SaleId} not found.") });
+            }
 
             await _saleRepository.DeleteAsync(sale, cancellationToken);
             return true;

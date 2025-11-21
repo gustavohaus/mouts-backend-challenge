@@ -19,13 +19,19 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public SaleProduct(Sale sale, Product product, int quantity)
         {
+            Product = product;
+
+            this.Initialize(sale, quantity);
+
+        }
+
+        private void Initialize(Sale sale, int quantity)
+        {
             if (quantity > 20)
                 throw new InvalidOperationException("Cannot sell more than 20 identical items.");
 
             Sale = sale;
             SaleId = sale.Id;
-            Product = product;
-            ProductId = product.Id;
             Quantity = quantity;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
