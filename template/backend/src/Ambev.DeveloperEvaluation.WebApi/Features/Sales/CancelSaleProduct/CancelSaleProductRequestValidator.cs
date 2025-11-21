@@ -7,7 +7,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSaleProduct
         public CancelSaleProductRequestValidator()
         {
             RuleFor(x => x.SaleId).NotEmpty();
-            RuleFor(x => x.SaleProductId).NotEmpty();
+            RuleFor(x => x.ProductId).NotEmpty();
         }
     }
 }

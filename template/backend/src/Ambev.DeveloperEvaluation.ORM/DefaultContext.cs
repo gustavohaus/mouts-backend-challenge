@@ -1,6 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
@@ -19,6 +20,19 @@ public class DefaultContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(new ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
+                }
+            }
+        }
+
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         base.OnModelCreating(modelBuilder);
     }

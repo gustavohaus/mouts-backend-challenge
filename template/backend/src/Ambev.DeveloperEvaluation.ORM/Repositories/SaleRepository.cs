@@ -67,24 +67,22 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
 
 
         public async Task<(List<Sale>, int)> GetPagedSalesAsync(
-        int pageNumber,
-        int pageSize,
-        DateTime? startDate,
-        DateTime? endDate,
-        Guid? customerId,
-        Guid? branchId,
-        SaleStatus? status,
-        CancellationToken cancellationToken = default)
+            int pageNumber,
+            int pageSize,
+            DateTime? startDate,
+            DateTime? endDate,
+            Guid? customerId,
+            Guid? branchId,
+            SaleStatus? status,
+            CancellationToken cancellationToken = default)
         {
-            var query = _context.Sales
-                .Include(s => s.SaleProducts)
-                .AsQueryable();
+            var query = _context.Sales.AsQueryable();
 
             if (startDate.HasValue)
-                query = query.Where(s => s.CreatedAt >= startDate.Value);
+                query = query.Where(s => s.CreatedAt >= DateTime.SpecifyKind(startDate.Value.Date, DateTimeKind.Utc));
 
             if (endDate.HasValue)
-                query = query.Where(s => s.CreatedAt <= endDate.Value);
+                query = query.Where(s => s.CreatedAt <= DateTime.SpecifyKind(endDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc));
 
             if (customerId.HasValue)
                 query = query.Where(s => s.CustomerId == customerId.Value);
@@ -99,9 +97,10 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
 
             var sales = await query
                 .Include(s => s.SaleProducts)
-                .ThenInclude(s => s.Product)
+                .ThenInclude(sp => sp.Product)
                 .Include(s => s.Branch)
                 .Include(s => s.Customer)
+                .OrderBy(s => s.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);

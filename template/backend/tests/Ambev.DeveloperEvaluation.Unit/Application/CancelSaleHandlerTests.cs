@@ -19,19 +19,15 @@ namespace Ambev.DeveloperEvaluation.Unit.Application;
 public class CancelSaleHandlerTests
 {
     private readonly ISaleRepository _saleRepository;
-    private readonly IMapper _mapper;
     private readonly ILogger<CancelSaleHandler> _logger;
-    private readonly IValidator<CancelSaleCommand> _validator;
     private readonly CancelSaleHandler _handler;
     private readonly Faker _faker;
 
     public CancelSaleHandlerTests()
     {
         _saleRepository = Substitute.For<ISaleRepository>();
-        _mapper = Substitute.For<IMapper>();
-        _logger = Substitute.For<ILogger<CancelSaleHandler>>();
-        _validator = Substitute.For<IValidator<CancelSaleCommand>>();
-        _handler = new CancelSaleHandler(_saleRepository, _mapper, _logger, _validator);
+        _logger = Substitute.For<ILogger<CancelSaleHandler>>();;
+        _handler = new CancelSaleHandler(_saleRepository, _logger);
         _faker = new Faker();
     }
 
