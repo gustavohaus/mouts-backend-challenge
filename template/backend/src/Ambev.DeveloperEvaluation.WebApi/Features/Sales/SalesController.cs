@@ -1,11 +1,16 @@
+using Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
+using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSaleProduct;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
 using AutoMapper;
 using FluentValidation;
@@ -132,9 +137,79 @@ public class SalesController : BaseController
         var command = new DeleteSaleCommand { SaleId = id };
         var response = await _mediator.Send(command, cancellationToken);
 
-        if (response)
-            return NotFound(new ApiResponse { Success = false, Message = "Sale not found" });
+        if (!response)
+            return NotFound(new { Success = false, Message = "Sale not found" });
 
-        return Ok(new ApiResponse { Success = true, Message = "Sale deleted successfully" });
+        return Ok(new { Success = true, Message = "Sale deleted successfully" });
+    }
+
+
+    [HttpPut]
+    [ProducesResponseType(typeof(ApiResponseWithData<UpdateSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update([FromBody] UpdateSaleRequest request, CancellationToken cancellationToken)
+    {
+        var validator = new UpdateSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+
+        var command = _mapper.Map<UpdateSaleCommand>(request);
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return Created(string.Empty, new ApiResponseWithData<UpdateSaleResponse>
+        {
+            Success = true,
+            Message = "Sale alter successfully",
+            Data = _mapper.Map<UpdateSaleResponse>(response)
+        });
+    }
+    [HttpPatch("sales/{saleId}/items/{itemId}/cancel")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CancelSaleProduct(
+    [FromRoute] Guid saleId,
+    [FromRoute] Guid itemId,
+    CancellationToken cancellationToken)
+    {
+        var request = new CancelSaleProductRequest
+        {
+            SaleId = saleId,
+            SaleProductId = itemId
+        };
+        var validator = new CancelSaleProductRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+
+        var command = _mapper.Map<CancelSaleCommand>(request);
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return Ok();
+    }
+
+    [HttpPatch("{saleId}/cancel")]
+    [ProducesResponseType(typeof(ApiResponseWithData<UpdateSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Cancel(
+        [FromRoute] Guid saleId,
+        CancellationToken cancellationToken)
+    {
+        CancelSaleRequest request = new CancelSaleRequest() { SaleId = saleId };
+
+        var validator = new CancelSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var command = _mapper.Map<CancelSaleCommand>(request);
+        await _mediator.Send(command, cancellationToken);
+
+        return Ok();
     }
 }
