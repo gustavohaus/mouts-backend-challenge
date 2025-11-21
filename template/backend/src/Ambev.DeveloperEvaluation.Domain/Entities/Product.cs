@@ -9,12 +9,18 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 {
     public class Product : BaseEntity
     {
-        public string Name { get; }
-        public string Description{ get; }
+        public string Name { get; set; } = string.Empty;
+        public string Description{ get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
-        public DateTime CreatedAt { get; }
-        public DateTime UpdatedAt { get; }
+        public DateTime CreatedAt { get; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; } = DateTime.UtcNow;
         public ICollection<SaleProduct> SaleProducts { get; set; } = new List<SaleProduct>();
-     
+
+
+        public Product()
+        {
+            
+        }
+
     }
 }

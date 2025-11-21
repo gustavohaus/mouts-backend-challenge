@@ -33,10 +33,6 @@ public class UpdateSaleCommandValidator : AbstractValidator<UpdateSaleCommand>
                 .WithMessage("Quantity must be greater than zero.")
                 .LessThanOrEqualTo(20)
                 .WithMessage("Quantity cannot exceed 20.");
-
-            product.RuleFor(p => p.UnitPrice)
-                .GreaterThan(0)
-                .WithMessage("Unit price must be greater than zero.");
         });
     }
 }

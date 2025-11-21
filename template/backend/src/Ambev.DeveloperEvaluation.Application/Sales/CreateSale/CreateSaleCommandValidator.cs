@@ -12,6 +12,10 @@ public class CreateSaleCommandValidator : AbstractValidator<CreateSaleCommand>
     /// </summary>
     public CreateSaleCommandValidator()
     {
+        RuleFor(x => x.SaleNumber)
+            .NotEmpty()
+            .WithMessage("SaleNumber is required.");
+
         RuleFor(x => x.CustomerId)
             .NotEmpty()
             .WithMessage("Customer ID is required.");
@@ -19,12 +23,6 @@ public class CreateSaleCommandValidator : AbstractValidator<CreateSaleCommand>
         RuleFor(x => x.BranchId)
             .NotEmpty()
             .WithMessage("Branch ID is required.");
-
-        RuleFor(x => x.Products)
-            .NotEmpty()
-            .WithMessage("At least one product is required.")
-            .Must(products => products.All(p => p.Quantity > 0))
-            .WithMessage("Product quantities must be greater than zero.");
 
         RuleForEach(x => x.Products).ChildRules(product =>
         {

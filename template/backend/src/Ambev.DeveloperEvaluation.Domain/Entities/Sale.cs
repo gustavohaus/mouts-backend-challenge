@@ -41,7 +41,20 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
                 AddProduct(product);
             }
         }
+        public void UpdateProducts(List<SaleProduct> saleProducts)
+        {
+            foreach (var product in saleProducts)
+            {
+                Update(product);
+            }
+        }
 
+        public void Update(SaleProduct saleProduct)
+        {
+            saleProduct.Update(saleProduct.Quantity);
+            CalculateTotalAmount();
+            Update();
+        }
         public void AddProduct(SaleProduct saleProduct)
         {
             _saleProducts.Add(saleProduct);

@@ -7,12 +7,12 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 /// <summary>
 /// Handler for processing GetSalesCommand requests
 /// </summary>
-public class GetSaleHandler : IRequestHandler<GetSalesCommand, PagedSalesResult>
+public class GetSalesHandler : IRequestHandler<GetSalesCommand, PagedSalesResult>
 {
     private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
 
-    public GetSaleHandler(ISaleRepository saleRepository, IMapper mapper)
+    public GetSalesHandler(ISaleRepository saleRepository, IMapper mapper)
     {
         _saleRepository = saleRepository;
         _mapper = mapper;

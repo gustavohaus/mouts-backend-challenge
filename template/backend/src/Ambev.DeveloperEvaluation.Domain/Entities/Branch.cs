@@ -14,7 +14,13 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public string PostalCode { get; private set; } = string.Empty;
         public string ManagerName { get; private set; } = string.Empty;
         public BranchStatus Status { get;  set; }
-        public DateTime CreatedAt { get; private set; }
-        public DateTime UpdatedAt { get; private set; }
+        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+
+
+        public Branch()
+        {
+            
+        }
     }
 }

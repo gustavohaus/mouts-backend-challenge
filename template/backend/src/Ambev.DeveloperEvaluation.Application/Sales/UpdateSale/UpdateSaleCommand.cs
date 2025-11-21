@@ -1,6 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 {
@@ -8,6 +9,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
     /// <summary>
     /// Command to create a new sale
     /// </summary>
+    /// 
+    [ExcludeFromCodeCoverage]
     public class UpdateSaleCommand : IRequest<GetSaleResult>
     {
         public Guid Id { get; set; }

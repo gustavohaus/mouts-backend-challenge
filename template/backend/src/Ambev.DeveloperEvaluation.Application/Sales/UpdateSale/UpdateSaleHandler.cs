@@ -62,7 +62,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
                 .Where(x => !products.Any(p => p.ProductId == x.ProductId))
                 .Select(x => x.ProductId)
                 .ToList();
-            sale.RemoveProducts(removeProducts);
+
+            foreach (var productId in removeProducts)
+                sale.RemoveProduct(productId);
         }
     }
 }

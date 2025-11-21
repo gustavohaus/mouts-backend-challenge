@@ -6,8 +6,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSaleProduct
     {
         public CancelSaleProductProfile()
         {
-            //CreateMap<UpdateSaleRequest, UpdateSaleCommand>();
-            //CreateMap<UpdateSaleResponse, UpdateSaleResponse>();
+
         }
     }
 }
