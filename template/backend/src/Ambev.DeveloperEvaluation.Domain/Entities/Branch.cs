@@ -1,11 +1,11 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Enums;
+﻿using Ambev.DeveloperEvaluation.Domain.Common;
+using Ambev.DeveloperEvaluation.Domain.Enums;
 
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities
 {
-    public class Branch
+    public class Branch : BaseEntity
     {
-        public Guid Id { get; set; }
         public string Name { get; private set; } = string.Empty;
         public string Phone { get; private set; } = string.Empty;
         public string Address { get; private set; } = string.Empty;

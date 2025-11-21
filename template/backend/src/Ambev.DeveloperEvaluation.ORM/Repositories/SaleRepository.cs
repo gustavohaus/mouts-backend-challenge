@@ -32,6 +32,8 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
             return await _context.Sales
                 .Include(s => s.SaleProducts)
                 .ThenInclude(s => s.Product)
+                .Include(s => s.Branch)
+                .Include(s => s.Customer)
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         }
 

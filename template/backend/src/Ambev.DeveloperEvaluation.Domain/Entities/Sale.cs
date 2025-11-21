@@ -1,13 +1,13 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Enums;
+﻿using Ambev.DeveloperEvaluation.Domain.Common;
+using Ambev.DeveloperEvaluation.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities
 {
-    public class Sale
+    public class Sale : BaseEntity
     {
-        public Guid Id { get; private set; }
         public string SaleNumber { get; private set; }
         public Guid CustomerId { get; private set; }
         public Guid BranchId { get; private set; }

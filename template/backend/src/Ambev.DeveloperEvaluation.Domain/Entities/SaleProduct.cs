@@ -1,9 +1,10 @@
 ﻿
+using Ambev.DeveloperEvaluation.Domain.Common;
+
 namespace Ambev.DeveloperEvaluation.Domain.Entities
 {
-    public class SaleProduct
+    public class SaleProduct : BaseEntity
     {
-        public Guid Id { get; set; }
         public Guid SaleId { get; set; }
         public Sale Sale { get; set; }
         public Guid ProductId { get; set; }
