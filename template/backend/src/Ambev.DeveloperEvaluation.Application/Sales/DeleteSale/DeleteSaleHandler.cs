@@ -7,9 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale
 {
-    /// <summary>
-    /// Handler for processing CreateSaleCommand requests
-    /// </summary>
+
     public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, bool>
     {
         private readonly ISaleRepository _saleRepository;
