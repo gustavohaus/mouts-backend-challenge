@@ -12,19 +12,6 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Results;
 
 public class ResultsTests
 {
-    [Fact(DisplayName = "CancelSaleResult: Properties should be set correctly")]
-    public void CancelSaleResult_Properties_ShouldBeSetCorrectly()
-    {
-        // Arrange
-        var id = Guid.NewGuid();
-
-        // Act
-        var result = new CancelSaleResult { Id = id };
-
-        // Assert
-        result.Id.Should().Be(id);
-    }
-
     [Fact(DisplayName = "CreateSaleResult: Properties should be set correctly")]
     public void CreateSaleResult_Properties_ShouldBeSetCorrectly()
     {

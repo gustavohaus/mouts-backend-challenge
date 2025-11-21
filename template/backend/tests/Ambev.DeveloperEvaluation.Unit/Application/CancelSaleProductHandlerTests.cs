@@ -6,6 +6,7 @@ using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using Bogus;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -17,12 +18,14 @@ public class CancelSaleProductHandlerTests
     private readonly IMapper _mapper;
     private readonly CancelSaleProductHandler _handler;
     private readonly Faker _faker;
+    private readonly ILogger<CancelSaleProductHandler> _logger;
 
     public CancelSaleProductHandlerTests()
     {
         _saleRepository = Substitute.For<ISaleRepository>();
         _mapper = Substitute.For<IMapper>();
-        _handler = new CancelSaleProductHandler(_saleRepository, _mapper);
+        _logger = Substitute.For<ILogger<CancelSaleProductHandler>>();
+        _handler = new CancelSaleProductHandler(_saleRepository, _mapper, _logger);
         _faker = new Faker();
     }
 
@@ -39,21 +42,18 @@ public class CancelSaleProductHandlerTests
         };
 
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns(sale);
-        _saleRepository.UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>()).Returns(sale);
-        _mapper.Map<CancelSaleProductResult>(Arg.Any<Sale>()).Returns(new CancelSaleProductResult { Id = sale.Id });
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Id.Should().Be(sale.Id);
+        result.Should().BeTrue();
         productToCancel.IsCancelled.Should().BeTrue();
-        await _saleRepository.Received(1).UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>());
+        await _saleRepository.Received(1).UpdateAsync(sale, Arg.Any<CancellationToken>());
     }
 
-    [Fact(DisplayName = "Given a non-existent sale When cancelling product Then throws KeyNotFoundException")]
-    public async Task Handle_NonExistentSale_ThrowsKeyNotFoundException()
+    [Fact(DisplayName = "Given a non-existent sale When cancelling product Then throws ValidationException")]
+    public async Task Handle_NonExistentSale_ThrowsValidationException()
     {
         // Arrange
         var command = new CancelSaleProductCommand
@@ -62,15 +62,14 @@ public class CancelSaleProductHandlerTests
             SaleProduct = Guid.NewGuid()
         };
 
-        // Configura o mock para retornar null quando o SaleId não existir
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns((Sale)null);
 
         // Act
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>()
-            .WithMessage($"Sale with ID {command.SaleId} not found");
+        await act.Should().ThrowAsync<FluentValidation.ValidationException>()
+            .WithMessage($"*Sale {command.SaleId} not found.*");
     }
 
     [Fact(DisplayName = "Given a non-existent product in sale When cancelling product Then throws InvalidOperationException")]
@@ -107,7 +106,28 @@ public class CancelSaleProductHandlerTests
         };
 
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns(sale);
-        _saleRepository.UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>()).Returns(sale);
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        productToCancel.IsCancelled.Should().BeTrue();
+        sale.TotalAmount.Should().Be(sale.SaleProducts.Where(p => !p.IsCancelled).Sum(p => p.TotalAmount));
+    }
+
+    [Fact(DisplayName = "Given a sale When cancelling a product Then respects discount rules")]
+    public async Task Handle_CancellingProduct_RespectsDiscountRules()
+    {
+        // Arrange
+        var sale = GenerateValidSaleWithSpecificQuantities(10); // 10 items for discount validation
+        var productToCancel = sale.SaleProducts.First();
+        var command = new CancelSaleProductCommand
+        {
+            SaleId = sale.Id,
+            SaleProduct = productToCancel.ProductId
+        };
+
+        _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns(sale);
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
@@ -128,6 +148,19 @@ public class CancelSaleProductHandlerTests
             .ToList();
 
         sale.AddProducts(products);
+        return sale;
+    }
+
+    private Sale GenerateValidSaleWithSpecificQuantities(int quantity)
+    {
+        var branch = new Branch { Id = Guid.NewGuid(), Status = BranchStatus.Active };
+        var customer = new User { Id = Guid.NewGuid(), Role = UserRole.Customer };
+        var sale = new Sale(_faker.Random.String2(10), branch, customer);
+
+        var product = GenerateValidProduct();
+        var saleProduct = new SaleProduct(sale, product, quantity);
+
+        sale.AddProduct(saleProduct);
         return sale;
     }
 

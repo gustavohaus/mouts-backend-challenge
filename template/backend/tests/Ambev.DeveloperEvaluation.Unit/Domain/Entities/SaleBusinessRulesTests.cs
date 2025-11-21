@@ -49,14 +49,29 @@ public class SaleBusinessRulesTests
     {
         // Arrange
         var sale = GenerateValidSale();
-        var productToRemove = sale.SaleProducts.First();
+        var products = sale.SaleProducts.Take(1).ToList().Select(x => (x.ProductId, x.Quantity));
+        var productToRemove = sale.SaleProducts.Where(x => !products.Any(n => n.ProductId == x.ProductId)).FirstOrDefault();
 
         // Act
-        sale.RemoveProduct(productToRemove.ProductId);
+        sale.SyncSaleProducts(products);
 
         // Assert
         sale.SaleProducts.Should().NotContain(productToRemove);
-        sale.TotalAmount.Should().Be(sale.SaleProducts.Sum(p => p.TotalAmount));
+        sale.TotalAmount.Should().Be(sale.SaleProducts.Where(x => !x.IsCancelled).Sum(p => p.TotalAmount));
+    }
+
+    [Fact(DisplayName = "Given a sale When updating products")]
+    public void ALTERAR()
+    {
+        // Arrange
+        var sale = GenerateValidSale();
+        var productsUpdate = sale.SaleProducts.Take(1).ToList().Select(x => (x.ProductId, _faker.Random.Int(1, 20)));
+
+        // Act
+        sale.SyncSaleProducts(productsUpdate);
+
+        // Assert
+        sale.TotalAmount.Should().Be(sale.SaleProducts.Where(x => !x.IsCancelled).Sum(p => p.TotalAmount));
     }
 
     [Fact(DisplayName = "Given a sale When cancelling a product Then product is marked as cancelled")]
@@ -88,6 +103,7 @@ public class SaleBusinessRulesTests
         sale.SaleProducts.All(p => p.IsCancelled).Should().BeTrue();
         sale.TotalAmount.Should().Be(0);
     }
+
 
     [Fact(DisplayName = "Given a sale When adding a product with more than 20 items Then throws InvalidOperationException")]
     public void Given_Sale_When_AddingProductWithMoreThan20Items_Then_ThrowsInvalidOperationException()
@@ -141,7 +157,7 @@ public class SaleBusinessRulesTests
         var sale = new Sale(_faker.Random.String2(10), branch, customer);
 
         var products = Enumerable.Range(1, _faker.Random.Int(1, 5))
-            .Select(_ => new SaleProduct(sale, GenerateValidProduct(), _faker.Random.Int(1, 10)))
+            .Select(_ => new SaleProduct(sale, GenerateValidProduct(), _faker.Random.Int(1, 20)))
             .ToList();
 
         sale.AddProducts(products);

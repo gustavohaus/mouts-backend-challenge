@@ -9,35 +9,6 @@ namespace Ambev.DeveloperEvaluation.Unit.Validation;
 
 public class ValidatorsTests
 {
-    [Fact(DisplayName = "CancelSaleCommandValidator: Valid SaleId should pass validation")]
-    public void CancelSaleCommandValidator_ValidSaleId_ShouldPassValidation()
-    {
-        // Arrange
-        var validator = new CancelSaleCommandValidator();
-        var command = new CancelSaleCommand { SaleId = Guid.NewGuid() };
-
-        // Act
-        var result = validator.TestValidate(command);
-
-        // Assert
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Fact(DisplayName = "CancelSaleCommandValidator: Empty SaleId should fail validation")]
-    public void CancelSaleCommandValidator_EmptySaleId_ShouldFailValidation()
-    {
-        // Arrange
-        var validator = new CancelSaleCommandValidator();
-        var command = new CancelSaleCommand ();
-
-        // Act
-        var result = validator.TestValidate(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(c => c.SaleId)
-            .WithErrorMessage("Sale ID is required.");
-    }
-
     [Fact(DisplayName = "CreateSaleCommandValidator: Valid data should pass validation")]
     public void CreateSaleCommandValidator_ValidData_ShouldPassValidation()
     {
