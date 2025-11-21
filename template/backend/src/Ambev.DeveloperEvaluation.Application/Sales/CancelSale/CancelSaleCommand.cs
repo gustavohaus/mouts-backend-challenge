@@ -11,7 +11,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale
     /// <summary>
     /// Command to create a new sale
     /// </summary>
-    public class CancelSaleCommand : IRequest<CancelSaleResult>
+    public class CancelSaleCommand : IRequest<bool>
     {
         public Guid SaleId { get; set; }    
     }

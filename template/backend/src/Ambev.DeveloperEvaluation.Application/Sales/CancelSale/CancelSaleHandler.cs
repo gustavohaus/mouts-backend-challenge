@@ -9,7 +9,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale
     /// <summary>
     /// Handler for processing CancelSaleCommand requests
     /// </summary>
-    public class CancelSaleHandler : IRequestHandler<CancelSaleCommand, CancelSaleResult>
+    public class CancelSaleHandler : IRequestHandler<CancelSaleCommand, bool>
     {
         private readonly ISaleRepository _saleRepository;
         private readonly IMapper _mapper;
@@ -28,27 +28,21 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale
             _validator = validator;
         }
 
-        public async Task<CancelSaleResult> Handle(CancelSaleCommand command, CancellationToken cancellationToken)
+        public async Task<bool> Handle(CancelSaleCommand command, CancellationToken cancellationToken)
         {
-            var validationResult = await _validator.ValidateAsync(command, cancellationToken);
-            if (!validationResult.IsValid)
-            {
-                _logger.LogWarning("Validation failed for CancelSaleCommand: {Errors}", validationResult.Errors);
-                throw new ValidationException(validationResult.Errors);
-            }
-
             var sale = await _saleRepository.GetByIdAsync(command.SaleId, cancellationToken);
 
             if (sale == null)
             {
-                _logger.LogWarning("Sale {Id} not found.", command.SaleId);
-                throw new KeyNotFoundException($"Sale with ID {command.SaleId} not found");
+                _logger.LogWarning("Sale {SaleId} does not exist or is not valid.", command.SaleId);
+                throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(command.SaleId), $"Sale {command.SaleId} not found.") });
             }
 
             sale.Cancel();
 
             await _saleRepository.UpdateAsync(sale, cancellationToken);
-            return _mapper.Map<CancelSaleResult>(sale);
+
+            return true;
         }
     }
 }

@@ -166,6 +166,7 @@ public class SalesController : BaseController
             Data = _mapper.Map<UpdateSaleResponse>(response)
         });
     }
+
     [HttpPatch("sales/{saleId}/items/{itemId}/cancel")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -187,14 +188,14 @@ public class SalesController : BaseController
 
 
         var command = _mapper.Map<CancelSaleCommand>(request);
-        var response = await _mediator.Send(command, cancellationToken);
+        await _mediator.Send(command, cancellationToken);
 
         return Ok();
     }
 
     [HttpPatch("{saleId}/cancel")]
-    [ProducesResponseType(typeof(ApiResponseWithData<UpdateSaleResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Cancel(
         [FromRoute] Guid saleId,
         CancellationToken cancellationToken)

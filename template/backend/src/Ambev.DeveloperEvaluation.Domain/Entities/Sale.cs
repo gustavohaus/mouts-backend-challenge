@@ -90,7 +90,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             productToUpdate.Update(quantity);
         }
 
-        private void RemoveProduct(Guid productId)
+        public void RemoveProduct(Guid productId)
         {
             var productToRemove = _saleProducts.FirstOrDefault(p => p.ProductId == productId);
 
@@ -98,6 +98,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
                 throw new InvalidOperationException($"Product with ID {productId} not found in the sale.");
 
             _saleProducts.Remove(productToRemove);
+
+
         }
 
         public void CancelProduct(Guid productId)
@@ -118,6 +120,12 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             {
                 saleProduct.Cancel();
             }
+
+            if (!_saleProducts.Any(x => !x.IsCancelled))
+                Status = SaleStatus.Cancelled;
+
+            this.CalculateTotalAmount();
+            this.Update();
         }
 
         private void CalculateTotalAmount()
