@@ -8,11 +8,26 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale
     {
         public UpdateSaleRequestValidator()
         {
-            RuleFor(x => x.SaleNumber).NotEmpty().MaximumLength(50);
-            RuleFor(x => x.SaleDate).NotEmpty();
-            RuleFor(x => x.CustomerId).NotEmpty();
-            RuleFor(x => x.BranchId).NotEmpty();
+            RuleFor(x => x.SaleNumber)
+                .NotEmpty().WithMessage("Sale number is required.")
+                .MaximumLength(50).WithMessage("Sale number must be at most 50 characters long.");
+
+            RuleFor(x => x.CustomerId)
+                .NotEmpty().WithMessage("Customer ID is required.");
+
+            RuleFor(x => x.BranchId)
+                .NotEmpty().WithMessage("Branch ID is required.");
+
             RuleForEach(x => x.SaleProducts).SetValidator(new UpdateSaleProductRequestValidator());
+
+            RuleFor(x => x.SaleProducts)
+                       .NotEmpty().WithMessage("Products list cannot be empty.")
+                       .Must(products =>
+                       {
+                           var productIds = products.Select(p => p.ProductId).ToList();
+                           return productIds.Distinct().Count() == productIds.Count;
+                       })
+                       .WithMessage("Duplicate products are not allowed in the Products list.");
         }
     }
 
@@ -20,9 +35,13 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale
     {
         public UpdateSaleProductRequestValidator()
         {
-            RuleFor(x => x.ProductId).NotEmpty();
-            RuleFor(x => x.Quantity).GreaterThan(0);
-            RuleFor(x => x.Quantity).LessThanOrEqualTo(20);
+            RuleFor(x => x.ProductId)
+                .NotEmpty().WithMessage("Product ID is required.");
+
+            RuleFor(x => x.Quantity)
+                .GreaterThan(0).WithMessage("Quantity must be greater than zero.")
+                .LessThanOrEqualTo(20).WithMessage("Quantity cannot exceed 20 units.");
+
         }
     }
 }

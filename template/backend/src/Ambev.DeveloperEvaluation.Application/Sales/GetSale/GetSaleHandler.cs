@@ -1,6 +1,7 @@
 using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -29,9 +30,8 @@ public class GetSaleHandler : IRequestHandler<GetSaleCommand, GetSaleResult>
         if (sales == null)
         {
             _logger.LogWarning("Sale with ID {SaleId} not found.", request.SaleId);
-            throw new KeyNotFoundException($"Sale with ID {request.SaleId} not found.");
+            throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(request.SaleId), $"Sale with ID {request.SaleId} not found.") });
         }
-
 
         return _mapper.Map<GetSaleResult>(sales);
     }

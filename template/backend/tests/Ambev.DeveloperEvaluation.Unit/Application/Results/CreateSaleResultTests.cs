@@ -19,7 +19,7 @@ public class CreateSaleResultTests
         var totalAmount = 100.50m;
         var saleProducts = new List<CreateSaleProductResult>
         {
-            new CreateSaleProductResult { UnitPrice = 50.25m, Discount = 10 }
+            new CreateSaleProductResult { UnitPrice = 50.25m, DiscountPercent = 10 }
         };
 
         // Act

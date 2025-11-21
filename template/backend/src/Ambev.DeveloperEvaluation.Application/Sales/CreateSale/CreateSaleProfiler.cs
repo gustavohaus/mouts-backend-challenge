@@ -18,8 +18,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
                        .ForMember(dest => dest.SaleDate, opt => opt.MapFrom(src => src.CreatedAt));
 
             CreateMap<SaleProduct, CreateSaleProductResult>()
-                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.Product.UnitPrice))
-                .ForMember(dest => dest.Discount, opt => opt.MapFrom(src => src.DiscountPercent));
+          .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => Math.Round(src.Product.UnitPrice, 2)))
+          .ForMember(dest => dest.DiscountPercent, opt => opt.MapFrom(src => Math.Round(src.DiscountPercent, 2)))
+          .ForMember(dest => dest.DiscountedPrice, opt => opt.MapFrom(src => Math.Round(src.Product.UnitPrice - (src.Product.UnitPrice * (src.DiscountPercent / 100)), 2)));
         }
     }
 }

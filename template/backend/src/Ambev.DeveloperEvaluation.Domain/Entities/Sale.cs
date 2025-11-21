@@ -3,6 +3,7 @@ using Ambev.DeveloperEvaluation.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Ambev.DeveloperEvaluation.Domain.Entities
 {
@@ -34,32 +35,59 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
+        public void UpdateInfo(string saleNumber , SaleStatus status = SaleStatus.Created)
+        {
+            SaleNumber = saleNumber;
+            Status = status;
+
+        }
+        public void SyncSaleProducts(IEnumerable<(Guid ProductId, int Quantity)> entries)
+        {
+            var removeProducts = _saleProducts
+                .Where(x => !entries.Any(p => p.ProductId == x.ProductId))
+                .Select(x => x.ProductId)
+                .ToList();
+
+            var update = entries
+                .Where(x => _saleProducts.Any(p => p.ProductId == x.ProductId && p.Quantity != x.Quantity))
+                .ToList();
+
+            foreach (var saleProduct in update)
+            {
+                this.UpdateSaleProduct(saleProduct.ProductId, saleProduct.Quantity);
+            }
+
+            foreach (var saleProduct in removeProducts)
+            {
+                this.RemoveProduct(saleProduct);
+            }
+
+            this.CalculateTotalAmount();
+            this.Update();
+
+        }
         public void AddProducts(List<SaleProduct> saleProducts)
         {
             foreach (var product in saleProducts)
             {
-                AddProduct(product);
+                this.AddProduct(product);
             }
-        }
-        public void UpdateProducts(List<SaleProduct> saleProducts)
-        {
-            foreach (var product in saleProducts)
-            {
-                Update(product);
-            }
-        }
-
-        public void Update(SaleProduct saleProduct)
-        {
-            saleProduct.Update(saleProduct.Quantity);
-            CalculateTotalAmount();
-            Update();
         }
         public void AddProduct(SaleProduct saleProduct)
         {
             _saleProducts.Add(saleProduct);
-            CalculateTotalAmount();
-            Update();
+            this.CalculateTotalAmount();
+            this.Update();
+        }
+
+        private void UpdateSaleProduct(Guid ProductId, int quantity)
+        {
+            var productToUpdate = _saleProducts.FirstOrDefault(p => p.ProductId == ProductId);
+
+            if (productToUpdate == null)
+                throw new InvalidOperationException($"Product with ID {ProductId} not found in the sale.");
+
+            productToUpdate.Update(quantity);
         }
 
         public void RemoveProduct(Guid productId)
@@ -70,8 +98,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
                 throw new InvalidOperationException($"Product with ID {productId} not found in the sale.");
 
             _saleProducts.Remove(productToRemove);
-            CalculateTotalAmount();
-            Update();
+
+
         }
 
         public void CancelProduct(Guid productId)
@@ -82,8 +110,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
                 throw new InvalidOperationException($"Product with ID {productId} not found in the sale.");
 
             productToCancel.Cancel();
-            CalculateTotalAmount();
-            Update();
+            this.CalculateTotalAmount();
+            this.Update();
         }
 
         public void Cancel()
@@ -93,9 +121,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
                 saleProduct.Cancel();
             }
 
-            Status = SaleStatus.Cancelled;
-            CalculateTotalAmount();
-            Update();
+            if (!_saleProducts.Any(x => !x.IsCancelled))
+                Status = SaleStatus.Cancelled;
+
+            this.CalculateTotalAmount();
+            this.Update();
         }
 
         private void CalculateTotalAmount()

@@ -47,8 +47,8 @@ public class CreateSaleProfilerTests
 
         // Assert
         result.Should().NotBeNull();
-        result.UnitPrice.Should().Be(saleProduct.Product.UnitPrice);
-        result.Discount.Should().Be(saleProduct.DiscountPercent);
+        result.UnitPrice.Should().Be(Math.Round(saleProduct.Product.UnitPrice,2));
+        result.DiscountPercent.Should().Be(saleProduct.DiscountPercent);
     }
 
     private Sale GenerateValidSale()

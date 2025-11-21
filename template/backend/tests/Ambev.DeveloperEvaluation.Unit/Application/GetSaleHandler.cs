@@ -5,8 +5,10 @@ using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using Bogus;
 using FluentAssertions;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
@@ -48,18 +50,17 @@ public class GetSaleHandlerTests
     }
 
     [Fact(DisplayName = "Given a non-existent sale ID When retrieving sale Then throws KeyNotFoundException")]
-    public async Task Handle_NonExistentSaleId_ThrowsKeyNotFoundException()
+    public async Task Handle_NonExistentSaleId_ThrowsValidationException()
     {
         // Arrange
         var command = new GetSaleCommand(Guid.NewGuid());
-        _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns((Sale)null);
+        _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>()
-            .WithMessage($"Sale with ID {command.SaleId} not found.");
+        await act.Should().ThrowAsync<FluentValidation.ValidationException>();
     }
 
     private Sale GenerateValidSale()

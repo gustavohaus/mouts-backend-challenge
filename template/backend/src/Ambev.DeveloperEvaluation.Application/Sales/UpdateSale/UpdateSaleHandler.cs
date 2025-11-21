@@ -1,7 +1,10 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -13,58 +16,57 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
     public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, GetSaleResult>
     {
         private readonly ISaleRepository _saleRepository;
+        private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<UpdateSaleHandler> _logger;
 
-        public UpdateSaleHandler(ISaleRepository saleRepository, IMapper mapper, ILogger<UpdateSaleHandler> logger)
+        public UpdateSaleHandler(ISaleRepository saleRepository, IMapper mapper, IProductRepository productRepository, ILogger<UpdateSaleHandler> logger)
         {
             _saleRepository = saleRepository;
             _mapper = mapper;
             _logger = logger;
+            _productRepository = productRepository;
         }
 
         public async Task<GetSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
         {
+            _logger.LogInformation(
+            "Starting UpdateSale operation. SaleNumber: {SaleNumber}, CustomerId: {CustomerId}, BranchId: {BranchId}",
+            command.SaleNumber,
+            command.CustomerId,
+            command.BranchId);
+
             var sale = await _saleRepository.GetByIdAsync(command.Id, cancellationToken);
-            
-            if(sale == null)
+
+            if (sale == null)
             {
-                _logger.LogWarning("Sale {Id} not found.", command.Id);
-                throw new KeyNotFoundException($"User with ID {command.Id} not found");
-            }            
+                _logger.LogWarning("Sale {SaleId} does not exist or is not valid.", command.Id);
+                throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(command.Id), $"Sale {command.Id} not found.") });
+            }
 
-            var adds = command.SaleProducts.Where(x => x.Id == null).ToList();
-            AddProducts(sale, adds);
+            sale.UpdateInfo(command.SaleNumber);
 
-            var removeProducts = command.SaleProducts;
-            RemoveProducts(sale, removeProducts);
+            sale.SyncSaleProducts(command.SaleProducts.Select(p => (p.ProductId, p.Quantity)));
 
-            var update = command.SaleProducts.Where(x => sale.SaleProducts.Any(p => p.ProductId == x.ProductId 
-            && p.Quantity != x.Quantity)).ToList();
+            var addProducts = command.SaleProducts
+               .Where(e => !sale.SaleProducts.Any(p => p.ProductId == e.ProductId))
+               .ToList();
 
-            var updateProducts = _mapper.Map<List<SaleProduct>>(update);
-            sale.UpdateProducts(updateProducts);
+            foreach (var saleProductCommand in addProducts)
+            {
+                var product = await _productRepository.GetByIdAsync(saleProductCommand.ProductId, cancellationToken);
+                if (product == null)
+                {
+                    _logger.LogWarning("Product {ProductId} does not exist.", saleProductCommand.ProductId);
+                    throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(saleProductCommand.ProductId), $"Product {saleProductCommand.ProductId} does not exist.") });
+                }
+
+                sale.AddProduct(new SaleProduct(sale, product, saleProductCommand.Quantity));
+            }
 
             var updateSale = await _saleRepository.UpdateAsync(sale, cancellationToken);
 
             return _mapper.Map<GetSaleResult>(updateSale);
-        }
-
-        private void AddProducts(Sale sale, List<UpdateSaleProductsCommand> products)
-        {
-            var addProducts = _mapper.Map<List<SaleProduct>>(products);
-            sale.AddProducts(addProducts);
-        }
-
-        private void RemoveProducts(Sale sale, List<UpdateSaleProductsCommand> products)
-        {
-            var removeProducts = sale.SaleProducts
-                .Where(x => !products.Any(p => p.ProductId == x.ProductId))
-                .Select(x => x.ProductId)
-                .ToList();
-
-            foreach (var productId in removeProducts)
-                sale.RemoveProduct(productId);
         }
     }
 }
