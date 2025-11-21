@@ -66,6 +66,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 
             var updateSale = await _saleRepository.UpdateAsync(sale, cancellationToken);
 
+            _logger.LogInformation("Sale {SaleNumber} updated successfully.", command.SaleNumber);
+
             return _mapper.Map<GetSaleResult>(updateSale);
         }
     }
