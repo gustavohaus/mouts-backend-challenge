@@ -38,7 +38,7 @@ public class CancelSaleProductHandlerTests
         var command = new CancelSaleProductCommand
         {
             SaleId = sale.Id,
-            SaleProduct = productToCancel.ProductId
+            ProductId = productToCancel.ProductId
         };
 
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns(sale);
@@ -59,7 +59,7 @@ public class CancelSaleProductHandlerTests
         var command = new CancelSaleProductCommand
         {
             SaleId = Guid.NewGuid(),
-            SaleProduct = Guid.NewGuid()
+            ProductId = Guid.NewGuid()
         };
 
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns((Sale)null);
@@ -80,7 +80,7 @@ public class CancelSaleProductHandlerTests
         var command = new CancelSaleProductCommand
         {
             SaleId = sale.Id,
-            SaleProduct = Guid.NewGuid() // Non-existent product ID
+            ProductId = Guid.NewGuid() // Non-existent product ID
         };
 
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns(sale);
@@ -90,7 +90,7 @@ public class CancelSaleProductHandlerTests
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage($"Product with ID {command.SaleProduct} not found in the sale.");
+            .WithMessage($"Product with ID {command.ProductId} not found in the sale.");
     }
 
     [Fact(DisplayName = "Given a sale with products eligible for discounts When cancelling Then discounts are recalculated")]
@@ -102,7 +102,7 @@ public class CancelSaleProductHandlerTests
         var command = new CancelSaleProductCommand
         {
             SaleId = sale.Id,
-            SaleProduct = productToCancel.ProductId
+            ProductId = productToCancel.ProductId
         };
 
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns(sale);
@@ -124,7 +124,7 @@ public class CancelSaleProductHandlerTests
         var command = new CancelSaleProductCommand
         {
             SaleId = sale.Id,
-            SaleProduct = productToCancel.ProductId
+            ProductId = productToCancel.ProductId
         };
 
         _saleRepository.GetByIdAsync(command.SaleId, Arg.Any<CancellationToken>()).Returns(sale);

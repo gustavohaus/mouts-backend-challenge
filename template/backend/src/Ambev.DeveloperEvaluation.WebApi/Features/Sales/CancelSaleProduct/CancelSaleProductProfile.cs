@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.CancelSaleProduct;
+using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSaleProduct
 {
@@ -7,6 +8,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSaleProduct
         public CancelSaleProductProfile()
         {
 
+            CreateMap<CancelSaleProductRequest, CancelSaleProductCommand>();
         }
     }
 }

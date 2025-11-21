@@ -3,6 +3,6 @@
     public class CancelSaleProductRequest
     {
         public Guid SaleId { get; set; }
-        public Guid SaleProductId { get; set; }
+        public Guid ProductId { get; set; }
     }
 }

@@ -1,9 +1,11 @@
 using Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
+using Ambev.DeveloperEvaluation.Application.Sales.CancelSaleProduct;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSaleProduct;
@@ -114,8 +116,8 @@ public class SalesController : BaseController
             {
                 Success = true,
                 Data = response,
-                CurrentPage = item.PageNumber,
-                TotalPages = (int)Math.Ceiling((double)item.TotalCount / item.PageSize),
+                CurrentPage = request.PageNumber,
+                TotalPages = (int)Math.Ceiling((double)item.TotalCount / request.PageSize),
                 TotalCount = item.TotalCount
             });
         }
@@ -167,18 +169,18 @@ public class SalesController : BaseController
         });
     }
 
-    [HttpPatch("sales/{saleId}/items/{itemId}/cancel")]
+    [HttpPatch("sales/{saleId}/products/{productId}/cancel")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CancelSaleProduct(
     [FromRoute] Guid saleId,
-    [FromRoute] Guid itemId,
+    [FromRoute] Guid productId,
     CancellationToken cancellationToken)
     {
         var request = new CancelSaleProductRequest
         {
             SaleId = saleId,
-            SaleProductId = itemId
+            ProductId = productId
         };
         var validator = new CancelSaleProductRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -187,7 +189,7 @@ public class SalesController : BaseController
             return BadRequest(validationResult.Errors);
 
 
-        var command = _mapper.Map<CancelSaleCommand>(request);
+        var command = _mapper.Map<CancelSaleProductCommand>(request);
         await _mediator.Send(command, cancellationToken);
 
         return Ok();

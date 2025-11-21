@@ -33,6 +33,7 @@ public class SaleProductsDto
     public int Quantity { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal UnitPrice { get; set; }
+    public decimal IsCancelled { get; set; }
 }
 public class BranchDto
 {
