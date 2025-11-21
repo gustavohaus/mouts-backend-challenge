@@ -48,3 +48,12 @@ services:
        MONGO_INITDB_ROOT_PASSWORD: ev@luAt10n
     ports:
        - "6379"
+
+  test-runner:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      sh -c "dotnet test --collect:\"XPlat Code Coverage\" &&
+             reportgenerator -reports:tests/**/coverage.cobertura.xml -targetdir:coverage-report"
