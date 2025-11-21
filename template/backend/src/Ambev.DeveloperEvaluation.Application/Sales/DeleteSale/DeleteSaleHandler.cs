@@ -30,11 +30,13 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale
             var sale = await _saleRepository.GetByIdAsync(request.SaleId, cancellationToken);
             if (sale == null)
             {
-                _logger.LogWarning("Sale with ID {SaleId} not found.", request.SaleId);
+                _logger.LogWarning("Sale -  {SaleId} not found.", request.SaleId);
                 throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(request.SaleId), $"Sale with ID {request.SaleId} not found.") });
             }
 
             await _saleRepository.DeleteAsync(sale, cancellationToken);
+            _logger.LogInformation("Sale {SaleId} was successfully deleted.", request.SaleId);
+
             return true;
         }
     }

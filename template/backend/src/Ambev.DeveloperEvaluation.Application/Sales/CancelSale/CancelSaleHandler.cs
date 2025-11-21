@@ -33,6 +33,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale
 
             await _saleRepository.UpdateAsync(sale, cancellationToken);
 
+
+            _logger.LogInformation("Sale {SaleId} cancelled successfully.", command.SaleId);
+
             return true;
         }
     }
