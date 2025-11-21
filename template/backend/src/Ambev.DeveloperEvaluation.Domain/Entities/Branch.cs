@@ -1,0 +1,26 @@
+﻿using Ambev.DeveloperEvaluation.Domain.Common;
+using Ambev.DeveloperEvaluation.Domain.Enums;
+
+
+namespace Ambev.DeveloperEvaluation.Domain.Entities
+{
+    public class Branch : BaseEntity
+    {
+        public string Name { get; private set; } = string.Empty;
+        public string Phone { get; private set; } = string.Empty;
+        public string Address { get; private set; } = string.Empty;
+        public string City { get; private set; } = string.Empty;
+        public string State { get; private set; } = string.Empty;
+        public string PostalCode { get; private set; } = string.Empty;
+        public string ManagerName { get; private set; } = string.Empty;
+        public BranchStatus Status { get;  set; }
+        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+
+
+        public Branch()
+        {
+            
+        }
+    }
+}
