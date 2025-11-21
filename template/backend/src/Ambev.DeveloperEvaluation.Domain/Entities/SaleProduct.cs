@@ -15,5 +15,52 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
+
+        protected SaleProduct()
+        {
+
+        }
+        public SaleProduct(Sale sale, Product product, int quantity)
+        {
+            Sale = sale;
+            SaleId = sale.Id;
+            Product = product;
+            ProductId = product.Id;
+            Quantity = quantity;
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+
+            this.ApplyDiscountIfEligible();
+            this.UpdateTotalAmount();
+        }
+
+        public void Update(int quantity)
+        {
+            this.Quantity = quantity;
+
+            this.ApplyDiscountIfEligible();
+            this.UpdateTotalAmount();
+        }
+        public void Cancel()
+        {
+            IsCancelled = true;
+
+        }
+
+        private void ApplyDiscountIfEligible()
+        {
+            if (Quantity >= 4 && Quantity < 10)
+                DiscountPercent = 0.10m;
+            else if (Quantity >= 10 && Quantity <= 20)
+                DiscountPercent = 0.20m;
+        }
+
+
+        private void UpdateTotalAmount()
+        {
+            var baseAmount = Product.UnitPrice * Quantity;
+            TotalAmount = baseAmount - (baseAmount * (DiscountPercent / 100));
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         protected Sale()
         {
-            
+
         }
 
         public Sale(
@@ -39,6 +39,89 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             Status = status;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
+        }
+
+
+        public void AddProducts(List<SaleProduct> saleProducts)
+        {
+            foreach (var product in saleProducts)
+            {
+                AddProduct(product);
+            }
+        }
+        public void UpdateProducts(List<SaleProduct> saleProducts)
+        {
+            foreach (var product in saleProducts)
+            {
+                var updateProduct = _saleProducts.FirstOrDefault(p => p.ProductId == product.Id);
+
+                if (updateProduct != null)
+                    updateProduct.Update(product.Quantity);
+            }
+        }
+        public void RemoveProducts(List<Guid> productIds)
+        {
+            foreach (var productId in productIds)
+            {
+                RemoveProduct(productId);
+            }
+        }
+
+        public void AddProduct(SaleProduct saleProduct)
+        {
+            _saleProducts.Add(saleProduct);
+            this.CalculateTotalAmount();
+            this.Update();
+        }
+        public void CancelProduct(Guid productId)
+        {
+            var updateProduct = _saleProducts.FirstOrDefault(p => p.ProductId == productId);
+
+            if (updateProduct != null)
+                updateProduct.Cancel();
+
+            this.Update();
+        }
+        public void Cancel()
+        {
+            foreach (var saleProduct in _saleProducts)
+            {
+                CancelProduct(saleProduct.ProductId);
+            }
+
+            this.Status = SaleStatus.Cancelled;
+            this.Update();
+
+        }
+        public void RemoveProduct(Guid productId)
+        {
+            var productToRemove = _saleProducts.FirstOrDefault(p => p.ProductId == productId);
+
+            if (productToRemove != null)
+                _saleProducts.Remove(productToRemove);
+
+            this.Update();
+        }
+
+        private void CalculateTotalAmount()
+        {
+            TotalAmount = _saleProducts.Where(x => x.IsCancelled == false).Sum(p => p.TotalAmount);
+        }
+
+        private void Update()
+        {
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Delete()
+        {
+            foreach (var saleProduct in _saleProducts)
+                RemoveProduct(saleProduct.ProductId);
+
+            this.Update();
+            this.CalculateTotalAmount();
+
+            Status = SaleStatus.Cancelled;
         }
 
     }
