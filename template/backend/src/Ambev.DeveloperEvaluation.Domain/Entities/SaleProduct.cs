@@ -50,9 +50,9 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         private void ApplyDiscountIfEligible()
         {
             if (Quantity >= 4 && Quantity < 10)
-                DiscountPercent = 0.10m;
+                DiscountPercent = 10.0m;
             else if (Quantity >= 10 && Quantity <= 20)
-                DiscountPercent = 0.20m;
+                DiscountPercent = 20.0m;
         }
 
 
