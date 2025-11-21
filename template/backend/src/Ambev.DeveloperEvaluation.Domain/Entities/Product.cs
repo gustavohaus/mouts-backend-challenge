@@ -11,7 +11,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
     {
         public string Name { get; }
         public string Description{ get; }
-        public decimal UnitPrice { get; }
+        public decimal UnitPrice { get; set; }
         public DateTime CreatedAt { get; }
         public DateTime UpdatedAt { get; }
         public ICollection<SaleProduct> SaleProducts { get; set; } = new List<SaleProduct>();

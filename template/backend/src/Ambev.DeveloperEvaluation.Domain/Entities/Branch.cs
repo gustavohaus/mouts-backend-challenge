@@ -13,7 +13,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public string State { get; private set; } = string.Empty;
         public string PostalCode { get; private set; } = string.Empty;
         public string ManagerName { get; private set; } = string.Empty;
-        public BranchStatus Status { get; private set; }
+        public BranchStatus Status { get;  set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
     }
