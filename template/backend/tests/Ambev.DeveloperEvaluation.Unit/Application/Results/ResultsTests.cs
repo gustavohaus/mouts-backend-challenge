@@ -41,7 +41,7 @@ public class ResultsTests
                 ProductId = Guid.NewGuid(),
                 Quantity = 2,
                 UnitPrice = 50.25m,
-                Discount = 10,
+                DiscountPercent = 10,
                 TotalAmount = 90,
                 IsCancelled = false
             }
@@ -85,7 +85,7 @@ public class ResultsTests
             ProductId = productId,
             Quantity = quantity,
             UnitPrice = unitPrice,
-            Discount = discount,
+            DiscountPercent = discount,
             TotalAmount = totalAmount,
             IsCancelled = isCancelled
         };
@@ -94,7 +94,7 @@ public class ResultsTests
         result.ProductId.Should().Be(productId);
         result.Quantity.Should().Be(quantity);
         result.UnitPrice.Should().Be(unitPrice);
-        result.Discount.Should().Be(discount);
+        result.DiscountPercent.Should().Be(discount);
         result.TotalAmount.Should().Be(totalAmount);
         result.IsCancelled.Should().Be(isCancelled);
     }

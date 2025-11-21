@@ -108,7 +108,7 @@ public class CreateSaleHandlerTests
         var act = () => _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact(DisplayName = "Given non-existent branch When creating sale Then throws invalid operation exception")]
@@ -124,7 +124,7 @@ public class CreateSaleHandlerTests
         var act = () => _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact(DisplayName = "Given non-existent product When creating sale Then throws invalid operation exception")]
@@ -144,6 +144,6 @@ public class CreateSaleHandlerTests
         var act = () => _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

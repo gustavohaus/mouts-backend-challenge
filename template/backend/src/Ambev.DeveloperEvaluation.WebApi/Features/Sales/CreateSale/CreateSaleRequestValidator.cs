@@ -16,6 +16,15 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
             RuleFor(x => x.BranchId)
                 .NotEmpty().WithMessage("Branch ID is required.");
             RuleForEach(x => x.Products).SetValidator(new SaleProductRequestValidator());
+
+            RuleFor(x => x.Products)
+                   .NotEmpty().WithMessage("Products list cannot be empty.")
+                   .Must(products =>
+                   {
+                       var productIds = products.Select(p => p.ProductId).ToList();
+                       return productIds.Distinct().Count() == productIds.Count;
+                   })
+                   .WithMessage("Duplicate products are not allowed in the Products list.");
         }
     }
 

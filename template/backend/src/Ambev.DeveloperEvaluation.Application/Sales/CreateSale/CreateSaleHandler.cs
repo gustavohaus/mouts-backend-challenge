@@ -41,8 +41,12 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
 
     public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting CreateSale operation for SaleNumber: {SaleNumber}", command.SaleNumber);
-
+        _logger.LogInformation(
+            "Starting CreateSale operation. SaleNumber: {SaleNumber}, CustomerId: {CustomerId}, BranchId: {BranchId}",
+            command.SaleNumber,
+            command.CustomerId,
+            command.BranchId);
+        
         var validationResult = await _validator.ValidateAsync(command, cancellationToken);
         if (!validationResult.IsValid)
         {
@@ -54,14 +58,14 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
         if (customer == null || customer.Role != UserRole.Customer)
         {
             _logger.LogWarning("Customer {CustomerId} does not exist or is not a valid customer.", command.CustomerId);
-            throw new InvalidOperationException($"Customer {command.CustomerId} does not exist or is not a valid customer.");
+            throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(command.CustomerId), $"Customer {command.CustomerId} does not exist or is not a valid customer.") });
         }
 
         var branch = await _branchRepository.GetByIdAsync(command.BranchId, cancellationToken);
         if (branch == null || branch.Status != BranchStatus.Active)
         {
             _logger.LogWarning("Branch {BranchId} does not exist or is not active.", command.BranchId);
-            throw new InvalidOperationException($"Branch {command.BranchId} does not exist or is not active.");
+            throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(command.BranchId), $"Branch {command.BranchId} does not exist or is not active.") });
         }
 
         var sale = new Sale(command.SaleNumber, branch, customer);
@@ -72,7 +76,7 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
             if (product == null)
             {
                 _logger.LogWarning("Product {ProductId} does not exist.", saleProductCommand.ProductId);
-                throw new InvalidOperationException($"Product {saleProductCommand.ProductId} does not exist.");
+                throw new ValidationException(new[] { new FluentValidation.Results.ValidationFailure(nameof(saleProductCommand.ProductId), $"Product {saleProductCommand.ProductId} does not exist.") });
             }
 
             // Add product to sale
