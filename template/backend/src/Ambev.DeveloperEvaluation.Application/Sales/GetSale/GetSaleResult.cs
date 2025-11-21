@@ -1,6 +1,6 @@
 using Ambev.DeveloperEvaluation.Domain.Enums;
 
-namespace Ambev.DeveloperEvaluation.Application.Sales.GetSales;
+namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 
 /// <summary>
 /// Represents a paged result of sales

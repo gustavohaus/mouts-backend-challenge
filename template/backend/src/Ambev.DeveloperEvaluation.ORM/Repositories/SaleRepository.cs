@@ -64,5 +64,49 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
             await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
+
+
+        public async Task<(List<Sale>, int)> GetPagedSalesAsync(
+        int pageNumber,
+        int pageSize,
+        DateTime? startDate,
+        DateTime? endDate,
+        Guid? customerId,
+        Guid? branchId,
+        SaleStatus? status,
+        CancellationToken cancellationToken = default)
+        {
+            var query = _context.Sales
+                .Include(s => s.SaleProducts)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(s => s.CreatedAt >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(s => s.CreatedAt <= endDate.Value);
+
+            if (customerId.HasValue)
+                query = query.Where(s => s.CustomerId == customerId.Value);
+
+            if (branchId.HasValue)
+                query = query.Where(s => s.BranchId == branchId.Value);
+
+            if (status.HasValue)
+                query = query.Where(s => s.Status == status.Value);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var sales = await query
+                .Include(s => s.SaleProducts)
+                .ThenInclude(s => s.Product)
+                .Include(s => s.Branch)
+                .Include(s => s.Customer)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (sales, totalCount);
+        }
     }
 }

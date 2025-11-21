@@ -1,4 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale
@@ -9,6 +9,9 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale
         {
             CreateMap<Guid, Application.Sales.GetSale.GetSaleCommand>()
                 .ConstructUsing(id => new Application.Sales.GetSale.GetSaleCommand(id));
+
+
+            CreateMap<GetSalesRequest, Application.Sales.GetSales.GetSalesCommand>();
 
             CreateMap<BranchDto, BranchResponse>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))

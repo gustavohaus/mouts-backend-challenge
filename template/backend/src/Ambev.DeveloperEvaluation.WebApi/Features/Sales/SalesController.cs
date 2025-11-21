@@ -1,5 +1,6 @@
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
+using Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
@@ -90,5 +91,26 @@ public class SalesController : BaseController
             });
 
         return Ok(_mapper.Map<GetSaleResponse>(response));
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(PaginatedResponse<List<GetSaleResponse>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll([FromQuery] GetSalesRequest request, CancellationToken cancellationToken = default)
+    {
+        {
+            var command = _mapper.Map<GetSalesCommand>(request);
+            var item = await _mediator.Send(command, cancellationToken);
+
+            var response = _mapper.Map<List<GetSaleResponse>>(item.Sales);
+
+            return Ok(new PaginatedResponse<GetSaleResponse>
+            {
+                Success = true,
+                Data = response,
+                CurrentPage = item.PageNumber,
+                TotalPages = (int)Math.Ceiling((double)item.TotalCount / item.PageSize),
+                TotalCount = item.TotalCount
+            });
+        }
     }
 }
